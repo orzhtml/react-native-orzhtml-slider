@@ -16,6 +16,7 @@ export interface MarkerProps {
   currentValue: number;
   valuePrefix?: string;
   valueSuffix?: string;
+  refresh?: boolean;
 }
 
 export interface LabelProps {

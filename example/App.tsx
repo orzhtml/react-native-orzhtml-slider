@@ -23,6 +23,7 @@ const App = () => {
   const [changeRotate, setChangeRotate] = useState(false)
   const [rotate, setRotate] = useState('0deg')
   const [sliderMax] = useState(1417)
+  const [sliderLength, setSliderLength] = useState(200)
 
   console.log('value:', value);
 
@@ -49,8 +50,10 @@ const App = () => {
           setChangeRotate(_changeRotate)
           if (_changeRotate) {
             setRotate('90deg')
+            setSliderLength(250)
           } else {
             setRotate('0deg')
+            setSliderLength(200)
           }
         }}
       >
@@ -80,7 +83,7 @@ const App = () => {
             max={sliderMax}
             enableLabel={true}
             vertical={changeRotate}
-            sliderLength={200}
+            sliderLength={sliderLength}
             containerStyle={{ height: 14 }}
             markerStyle={{ width: 14, height: 14 }}
             onValuesChangeFinish={(values: number) => {

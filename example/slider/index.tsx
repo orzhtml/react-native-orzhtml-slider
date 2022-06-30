@@ -9,8 +9,9 @@ import { SliderStyles } from './styles'
 
 const Slider = (props: SliderProps) => {
   const _markerRef = useRef<any>(null)
+  const _sliderLengthRef = useRef(props.sliderLength)
   const _optionsArrayRef = useRef(props.optionsArray || createArray(props.min, props.max, props.step))
-  const _initialValuesRef = useRef(valueToPosition(props.values, _optionsArrayRef.current, props.sliderLength))
+  const _initialValuesRef = useRef(valueToPosition(props.values, _optionsArrayRef.current, _sliderLengthRef.current))
   const _verticalRef = useRef(props.vertical)
   const _enabledRef = useRef(props.enabled)
 
@@ -19,10 +20,13 @@ const Slider = (props: SliderProps) => {
   const [past, setPast] = useState(_initialValuesRef.current)
   const [position, setPosition] = useState(_initialValuesRef.current)
   const [pressed, setPressed] = useState(false)
+  const [refresh, setRefresh] = useState(false)
   const _curValueRef = useRef(curValue)
   const _pastRef = useRef(past)
   const _positionRef = useRef(position)
   const _pressedRef = useRef(pressed)
+  const _refreshRef = useRef(false)
+  const _snappedRef = useRef(props.snapped)
 
   const Marker = props.customMarker
   const Label = props.customLabel
@@ -43,25 +47,29 @@ const Slider = (props: SliderProps) => {
   useEffect(() => {
     // 垂直滑动
     _verticalRef.current = props.vertical
-  }, [props.vertical])
-
-  useEffect(() => {
+    // 滑块长度
+    _sliderLengthRef.current = props.sliderLength
     // 是否启用
     _enabledRef.current = props.enabled
-  }, [props.enabled])
+    // 拍下了
+    _snappedRef.current = props.snapped
+    // 刷新视图
+    _refreshRef.current = !_refreshRef.current
+    setRefresh(_refreshRef.current)
+  }, [props.vertical, props.sliderLength, props.enabled, props.snapped])
 
   useEffect(() => {
     // 缓存进度
-    const _trackBuffer = valueToPosition(props.trackBuffer, _optionsArrayRef.current, props.sliderLength)
+    const _trackBuffer = valueToPosition(props.trackBuffer, _optionsArrayRef.current, _sliderLengthRef.current)
     setTrackBuffer(_trackBuffer)
-  }, [props.trackBuffer, props.sliderLength])
+  }, [props.trackBuffer, _sliderLengthRef.current])
 
   useEffect(() => {
     if (_pressedRef.current) { return }
 
     _optionsArrayRef.current = props.optionsArray || createArray(props.min, props.max, props.step)
 
-    const _position = valueToPosition(props.values, _optionsArrayRef.current, props.sliderLength)
+    const _position = valueToPosition(props.values, _optionsArrayRef.current, _sliderLengthRef.current)
 
     _curValueRef.current = props.values
     _pastRef.current = _position
@@ -73,7 +81,7 @@ const Slider = (props: SliderProps) => {
   }, [
     props.min, props.max,
     props.step, props.values,
-    props.sliderLength, props.optionsArray
+    _sliderLengthRef.current, props.optionsArray
   ])
 
   const onPanGrant = () => {
@@ -94,7 +102,7 @@ const Slider = (props: SliderProps) => {
     const accumDistanceDisplacement = _verticalRef.current ? -gestureState.dx : gestureState.dy
     const unconfined = I18nManager.isRTL ? _pastRef.current - accumDistance : accumDistance + _pastRef.current
     let bottom = 0
-    let top = props.sliderLength
+    let top = _sliderLengthRef.current
     let confined = unconfined < bottom ? bottom : unconfined > top ? top : unconfined
     let slipDisplacement = props.touchDimensions.slipDisplacement
 
@@ -102,14 +110,19 @@ const Slider = (props: SliderProps) => {
       Math.abs(accumDistanceDisplacement) < slipDisplacement ||
       !slipDisplacement
     ) {
-      _curValueRef.current = positionToValue(confined, _optionsArrayRef.current, top)
-      let snapped = valueToPosition(_curValueRef.current, _optionsArrayRef.current, top)
+      let value = positionToValue(confined, _optionsArrayRef.current, top)
+      let snapped = valueToPosition(value, _optionsArrayRef.current, top)
       _positionRef.current = props.snapped ? snapped : confined
 
       setPosition(_positionRef.current)
-      setCurValue(_curValueRef.current)
-      props.onValuesChange && props.onValuesChange(_curValueRef.current)
-      props.onMarkersPosition && props.onMarkersPosition(_positionRef.current)
+
+      if (value !== _curValueRef.current) {
+        _curValueRef.current = value
+        setCurValue(value)
+        props.onValuesChange && props.onValuesChange(value)
+        props.onMarkersPosition && props.onMarkersPosition(_positionRef.current)
+
+      }
     }
   }
 
@@ -129,13 +142,13 @@ const Slider = (props: SliderProps) => {
 
   const containerStyle = [SliderStyles.container, props.containerStyle]
   const {
-    selectedStyle, unselectedStyle, sliderLength,
+    selectedStyle, unselectedStyle,
     markerOffsetX, markerOffsetY,
   } = props
   const trackLength = position
   const trackStyle = selectedStyle || SliderStyles.selectedTrack
   const trackThreeStyle = unselectedStyle
-  const trackTwoLength = sliderLength - trackLength
+  const trackTwoLength = _sliderLengthRef.current - trackLength
   const trackTwoStyle = unselectedStyle
   const { slipDisplacement, height, width, borderRadius } = props.touchDimensions
   const touchStyle = { borderRadius: borderRadius || 0 }
@@ -158,7 +171,7 @@ const Slider = (props: SliderProps) => {
           <View
             style={[
               SliderStyles.fullTrack,
-              { width: sliderLength, position: 'relative' },
+              { width: _sliderLengthRef.current },
             ]}
           >
             <View
@@ -192,7 +205,7 @@ const Slider = (props: SliderProps) => {
                 SliderStyles.markerContainer,
                 markerContainer,
                 props.markerContainerStyle,
-                position > sliderLength / 2 && SliderStyles.topMarkerContainer,
+                position > _sliderLengthRef.current / 2 && SliderStyles.topMarkerContainer,
               ]}
             >
               <View
@@ -205,10 +218,11 @@ const Slider = (props: SliderProps) => {
                   pressedMarkerStyle={props.pressedMarkerStyle}
                   disabledMarkerStyle={props.disabledMarkerStyle}
                   markerStyle={props.markerStyle}
-                  enabled={props.enabled}
+                  enabled={_enabledRef.current}
                   currentValue={curValue}
                   valuePrefix={props.valuePrefix}
                   valueSuffix={props.valueSuffix}
+                  refresh={refresh}
                 />
               </View>
             </View>
