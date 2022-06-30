@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, TouchableHighlight } from 'react-native'
+import { View, TouchableHighlight } from 'react-native'
 
 import { MarkerProps } from './index.d'
 import { markerStyles } from './styles'

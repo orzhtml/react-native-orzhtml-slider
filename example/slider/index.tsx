@@ -1,8 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  StyleSheet, PanResponder,
-  View, I18nManager,
-} from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { PanResponder, View, I18nManager } from 'react-native'
 
 import { SliderProps } from './index.d'
 import { createArray, valueToPosition, positionToValue } from './converters'
@@ -10,7 +7,7 @@ import DefaultMarker from './DefaultMarker'
 import DefaultLabel from './DefaultLabel'
 import { SliderStyles } from './styles'
 
-const Slider = (props: any) => {
+const Slider = (props: SliderProps) => {
   const _markerRef = useRef<any>(null)
   const _optionsArrayRef = useRef(props.optionsArray || createArray(props.min, props.max, props.step))
   const _initialValuesRef = useRef(valueToPosition(props.values, _optionsArrayRef.current, props.sliderLength))
@@ -223,11 +220,9 @@ const Slider = (props: any) => {
 }
 
 Slider.defaultProps = {
+  customMarker: DefaultMarker,
+  customLabel: DefaultLabel,
   values: 0,
-  onValuesChangeStart: () => { },
-  onValuesChange: (values: any) => { },
-  onValuesChangeFinish: (values: any) => { },
-  onMarkersPosition: (values: any) => { },
   step: 1,
   min: 0,
   max: 10,
@@ -237,12 +232,9 @@ Slider.defaultProps = {
     borderRadius: 15,
     slipDisplacement: 200,
   },
-  customMarker: DefaultMarker,
-  customLabel: DefaultLabel,
   markerOffsetX: 0,
   markerOffsetY: 0,
   sliderLength: 280,
-  onToggle: undefined,
   enabled: true,
   snapped: false,
   vertical: false,
