@@ -1,6 +1,6 @@
 {
   "name": "react-native-orzhtml-slider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "react-native slider 简单滑块组件",
   "main": "index.tsx",
   "scripts": {

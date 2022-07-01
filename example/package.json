@@ -7,7 +7,10 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "ins": "yarn && yarn pod",
+    "pod": "cd ./ios && pod install && cd ..",
+    "clean": "rm -rf ./node_modules ./ios/Pods ./yarn.lock"
   },
   "dependencies": {
     "react": "17.0.2",
