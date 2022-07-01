@@ -8,15 +8,16 @@
  * @format
  */
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   StatusBar,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from 'react-native'
 
 import OrzHtmlSlider from './slider'
+import { useSingleInstanceVar, useSingleState, useStateCB } from './slider/UseCom'
 
 const App = () => {
   const [value, setValue] = useState(0)
@@ -24,8 +25,40 @@ const App = () => {
   const [rotate, setRotate] = useState('0deg')
   const [sliderMax] = useState(1417)
   const [sliderLength, setSliderLength] = useState(200)
+  const instanceVal = useSingleInstanceVar({
+    interval: null
+  })
+  const [getCount, setCount] = useStateCB(0)
+  const [state, setState] = useSingleState({
+    counts: 0,
+    time: +new Date()
+  })
+  const { counts, time } = state
 
-  console.log('value:', value);
+  const doSomeActions = () => {
+    console.log('useStateCB Current count:', getCount())
+  }
+
+  const doSomeActions2 = () => {
+    console.log('useSingleState Current ')
+    console.log("counts 在外部定义获取的不是最新:", counts)
+    console.log("state.counts 从 state 获取则是最新:", state.counts)
+  }
+
+  const start = () => {
+    stop()
+    instanceVal.interval = setInterval(
+      () => setState({ counts: state.counts + 1 }),
+      1000
+    )
+  }
+
+  const stop = () => {
+    const interval = instanceVal.interval
+    interval && clearInterval(interval)
+  }
+
+  console.log('value:', value)
 
   return (
     <View style={{ flex: 1 }}>
@@ -59,6 +92,30 @@ const App = () => {
       >
         <Text style={{ color: '#000' }}>旋转</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={{ padding: 5 }}
+        onPress={() => setCount(getCount() + 1, doSomeActions)}
+      >
+        <Text>Increase</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ padding: 5 }}
+        onPress={() => {
+          console.log('state.counts:', state.counts)
+          setState({
+            counts: state.counts + 1
+          }, doSomeActions2)
+        }}
+      >
+        <Text>Increase2</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={{ padding: 5 }} onPress={start}>
+        <Text>Start</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={{ padding: 5 }} onPress={stop}>
+        <Text>Stop</Text>
+      </TouchableOpacity>
+      <Text style={{ padding: 5 }}>{counts} {time}</Text>
       <View
         style={{
           backgroundColor: 'red',
@@ -97,7 +154,7 @@ const App = () => {
         </View>
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default App;
+export default App
