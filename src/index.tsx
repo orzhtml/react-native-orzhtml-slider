@@ -119,7 +119,6 @@ const Slider = (props: SliderProps) => {
         setState({
           curValue: value
         }, () => {
-          console.log('_position:', _position, state.position);
           props.onValuesChange && props.onValuesChange(state.curValue)
           props.onMarkersPosition && props.onMarkersPosition(state.position)
         })
