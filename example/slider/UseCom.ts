@@ -3,24 +3,26 @@ import { useState, useEffect, useRef } from 'react'
 // 而不是陈旧的值。并且也拥有了 callback 的能力。
 export function useStateCB(initialState: any): [() => any, (newState: any, callback: any) => any] {
   const [state, setState] = useState<any>(initialState)
-  const stateRef = useRef(initialState)
-  const callbackRef = useRef<null | ((a: any) => void)>(null)
+  const Instance = useSingleInstanceVar({
+    state: initialState,
+    callback: null
+  })
 
   useEffect(() => {
-    if (callbackRef.current) {
-      callbackRef.current(state)
-      callbackRef.current = null
+    if (Instance.callback) {
+      Instance.callback(state)
+      Instance.callback = null
     }
   }, [state])
 
   const newSetState = (newState: any, callback: any) => {
-    if (callback) callbackRef.current = callback
-    stateRef.current = newState
+    if (callback) Instance.callback = callback
+    Instance.state = newState
     setState(newState)
   }
 
   const getState = () => {
-    return stateRef.current
+    return Instance.state
   }
 
   return [getState, newSetState]
