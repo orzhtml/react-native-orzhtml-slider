@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, TouchableHighlight } from 'react-native'
 
-import { MarkerProps } from '../index.d'
+import { MarkerProps } from './index.d'
 import { markerStyles } from './styles'
 
 const DefaultMarker = (props: MarkerProps) => {

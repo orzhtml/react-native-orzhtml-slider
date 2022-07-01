@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
-import { LabelProps } from '../index.d'
+import { LabelProps } from './index.d'
 import { labelStyles } from './styles'
 
 const DefaultLabel = (props: LabelProps) => {
